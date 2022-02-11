@@ -1,3 +1,4 @@
+import BackButton from '../UI/BackButton';
 import ButtonPrimary from '../UI/ButtonPrimary';
 import Card from '../UI/Card';
 
@@ -5,10 +6,10 @@ const CreateChatComponent = (props) => {
   return (
     <Card>
       <div className='flex w-full mb-6 flex-grow-0'>
-        <button>BACK</button>
-        <h1 className='w-full font-semibold text-xl text-center'>
-          Start chatting
-        </h1>
+        <BackButton />
+        <div className='w-full flex justify-center items-center'>
+          <h1 className='font-semibold text-2xl text-center'>Start chatting</h1>
+        </div>
       </div>
 
       <div className='max-w-sm mb-6'>
@@ -17,10 +18,11 @@ const CreateChatComponent = (props) => {
           Enter a random word of your choice or generate a random string of
           characters
         </p>
-        <input type='text' />
+        <input className='mt-4 w-full' type='text' />
+        <button className=''>Generate</button>
       </div>
 
-      <ButtonPrimary>Continue</ButtonPrimary>
+      <ButtonPrimary onClick={props.onContinue}>Continue</ButtonPrimary>
     </Card>
   );
 };
