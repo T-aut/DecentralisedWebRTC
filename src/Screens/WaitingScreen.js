@@ -1,10 +1,10 @@
 import { Fragment } from 'react/cjs/react.production.min';
-import BackButton from '../UI/BackButton';
-import ButtonPrimary from '../UI/ButtonPrimary';
-import Card from '../UI/Card';
-import Loader from '../UI/Loader/Loader';
+import BackButton from '../Components/UI/BackButton';
+import ButtonPrimary from '../Components/UI/ButtonPrimary';
+import Card from '../Components/UI/Card';
+import Loader from '../Components/UI/Loader/Loader';
 
-const WaitForConnection = (props) => {
+const WaitingScreen = (props) => {
   const loader = () => {
     var result = 'loader';
     var n = 0;
@@ -41,4 +41,4 @@ const WaitForConnection = (props) => {
   );
 };
 
-export default WaitForConnection;
+export default WaitingScreen;
