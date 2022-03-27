@@ -10,10 +10,6 @@ const AcceptTargetOfferScreen = (props) => {
     setTargetOffer(event.target.value);
   };
 
-  const sendHello = () => {
-    props.channel.send('Hello!');
-  };
-
   const onContinue = async () => {
     await props.onAcceptTargetOffer(targetOffer);
     //props.onNavigate(strings.screens.WaitingScreen);
@@ -37,7 +33,6 @@ const AcceptTargetOfferScreen = (props) => {
         <input value={targetOffer} onChange={onChange} />
       </div>
       <ButtonPrimary onClick={onContinue}>Continue</ButtonPrimary>
-      <ButtonPrimary onClick={sendHello}>Send hello</ButtonPrimary>
     </Card>
   );
 };

@@ -10,10 +10,6 @@ const AcceptInitiatorOfferScreen = (props) => {
     setInitiatorOffer(event.target.value);
   };
 
-  const sendHello = () => {
-    props.channel.send('Hello!');
-  };
-
   const onContinue = async () => {
     await props.onAcceptOffer(initiatorOffer);
     //props.onNavigate(strings.screens.WaitingScreen);
@@ -39,7 +35,6 @@ const AcceptInitiatorOfferScreen = (props) => {
         <p className='py-4'>{props.targetOffer}</p>
       </div>
       <ButtonPrimary onClick={onContinue}>Continue</ButtonPrimary>
-      <ButtonPrimary onClick={sendHello}>Send hello</ButtonPrimary>
     </Card>
   );
 };

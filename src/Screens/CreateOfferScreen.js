@@ -1,14 +1,17 @@
 import BackButton from '../Components/UI/BackButton';
 import ButtonPrimary from '../Components/UI/ButtonPrimary';
 import Card from '../Components/UI/Card';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import strings from '../resources/constants/strings';
 
 const CreateOfferScreen = (props) => {
-  const onContinue = async () => {
+  // const onContinue = async () => {
+  //   await props.onCreateOffer();
+  // };
+
+  useEffect(async () => {
     await props.onCreateOffer();
-    //props.onNavigate(strings.screens.WaitingScreen);
-  };
+  }, []);
 
   const nextWindow = () => {
     props.onNavigate(strings.screens.AcceptTargetOfferScreen);
@@ -31,8 +34,8 @@ const CreateOfferScreen = (props) => {
         {/* <input className='mt-4 w-full' type='text' value={identifier} /> */}
         <p className='py-4'>{props.offer}</p>
       </div>
-      <ButtonPrimary onClick={onContinue}>Continue</ButtonPrimary>
-      <ButtonPrimary onClick={nextWindow}>nextWindow</ButtonPrimary>
+      {/* <ButtonPrimary onClick={onContinue}>Continue</ButtonPrimary> */}
+      <ButtonPrimary onClick={nextWindow}>I've sent the request</ButtonPrimary>
     </Card>
   );
 };
