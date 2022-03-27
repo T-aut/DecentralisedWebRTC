@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import ChatBubble from '../Components/UI/ChatBubble';
 import BottomChatComponent from '../Components/ChatScreen/BottomChatComponent';
-import ButtonPrimary from '../Components/UI/ButtonPrimary';
+import ChatHeader from '../Components/ChatScreen/ChatHeader';
 
 const ChatScreen = (props) => {
   const [messages, setMessages] = useState([]);
@@ -40,23 +40,32 @@ const ChatScreen = (props) => {
 
   return (
     <Fragment>
-      <BottomChatComponent />
-      <div className='flex flex-col px-6 overflow-auto py-2 w-full h-full'>
-        {messages.map((message) => {
-          if (message.isSender)
-            return <ChatBubble key={message.key} text={message.message} />;
-          else
-            return (
-              <div className='flex flex-row justify-end'>
-                <ChatBubble
-                  text={message.message}
-                  key={message.key}
-                  className='bg-rose-300'
-                />
-              </div>
-            );
-        })}
+      <ChatHeader />
+      <div className='flex flex-col-reverse px-6 overflow-auto py-2 w-full h-full'>
+        <ul>
+          {messages.map((message) => {
+            if (message.isSender)
+              return (
+                <li key={message.key}>
+                  <ChatBubble text={message.message} />
+                </li>
+              );
+            else
+              return (
+                <li key={message.key}>
+                  <div className='flex flex-row justify-end'>
+                    <ChatBubble
+                      text={message.message}
+                      key={message.key}
+                      className='bg-rose-400'
+                    />
+                  </div>
+                </li>
+              );
+          })}
+        </ul>
       </div>
+
       <BottomChatComponent onSendMessage={sendMessage} />
     </Fragment>
   );
