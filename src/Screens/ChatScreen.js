@@ -40,7 +40,7 @@ const ChatScreen = (props) => {
 
   return (
     <Fragment>
-      <ChatHeader />
+      <ChatHeader startCall={props.startCall} />
       <div className='flex flex-col-reverse px-6 overflow-auto py-2 w-full h-full'>
         <ul>
           {messages.map((message) => {

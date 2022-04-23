@@ -7,6 +7,8 @@ import adapter from 'webrtc-adapter';
 import WaitingScreen from './Screens/WaitingScreen';
 import AcceptInitiatorOfferScreen from './Screens/AcceptInitiatorOfferScreen';
 import AcceptTargetOfferScreen from './Screens/AcceptTargetOfferScreen';
+import Modal from './Components/UI/Modal/Modal';
+import ButtonPrimary from './Components/UI/ButtonPrimary';
 
 function App() {
   const [navigationScreen, setNavigationScreen] = useState('HomeScreen');
@@ -16,6 +18,27 @@ function App() {
   const [init, setInit] = useState(false);
   const [initiatorOffer, setInitiatorOffer] = useState('');
   const [targetOffer, setTargetOffer] = useState('');
+  const [isCalling, setIsCalling] = useState(false);
+
+  const StartCall = async () => {
+    setIsCalling(true);
+    setTimeout(() => {}, 1000);
+
+    const localStream = await navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+        audio: true,
+      })
+      .then((stream) => {
+        stream.getTracks().forEach((track) => {
+          connection.addTrack(track, stream);
+        });
+
+        const localCamera = document.getElementById('local_camera');
+
+        localCamera.srcObject = stream;
+      });
+  };
 
   // WebRTC connection
   const [connection, setConnection] = useState(
@@ -116,7 +139,7 @@ function App() {
         />
       )}
       {navigationScreen === strings.screens.ChatScreen && (
-        <ChatScreen channel={channel} />
+        <ChatScreen channel={channel} startCall={StartCall} />
       )}
       {navigationScreen === strings.screens.WaitingScreen && <WaitingScreen />}
       {navigationScreen === strings.screens.AcceptInitiatorOfferScreen && (
@@ -127,6 +150,25 @@ function App() {
       )}
       {navigationScreen === strings.screens.AcceptTargetOfferScreen && (
         <AcceptTargetOfferScreen onAcceptTargetOffer={onAcceptTargetOffer} />
+      )}
+      {isCalling && (
+        <Modal>
+          <div className='flex flex-1 flex-col items-center'>
+            <div className='flex w-full justify-between mb-2'>
+              <video
+                id='local_camera'
+                autoPlay={true}
+                className='bg-slate-400 w-2/4 mx-1 rounded-md'
+              ></video>
+              <video
+                id='remote_camera'
+                autoPlay={true}
+                className='bg-slate-400 w-2/4 mx-1 rounded-md'
+              ></video>
+            </div>
+            <ButtonPrimary>End call</ButtonPrimary>
+          </div>
+        </Modal>
       )}
     </div>
   );
