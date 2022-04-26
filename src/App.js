@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ChatScreen from './Screens/ChatScreen';
 import strings from './resources/constants/strings';
 import HomeScreen from './Screens/HomeScreen';
@@ -20,43 +20,97 @@ function App() {
   const [targetOffer, setTargetOffer] = useState('');
   const [isCalling, setIsCalling] = useState(false);
 
-  const StartCall = async () => {
-    setIsCalling(true);
-    setTimeout(() => {}, 1000);
+  // WebRTC connection (for data channel)
+  const [connection, setConnection] = useState(new RTCPeerConnection());
 
-    const localStream = await navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-        audio: true,
-      })
-      .then((stream) => {
-        stream.getTracks().forEach((track) => {
-          connection.addTrack(track, stream);
-        });
-
-        const localCamera = document.getElementById('local_camera');
-
-        localCamera.srcObject = stream;
-      });
-  };
-
-  // WebRTC connection
-  const [connection, setConnection] = useState(
+  // WebRTC connection (for video call)
+  const [videoConnection, setVideoConnection] = useState(
     new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     })
   );
+  const [localStream, setLocalStream] = useState(new MediaStream());
+  const [remoteStream, setRemoteStream] = useState(new MediaStream());
+
+  const StartCall = async () => {
+    setIsCalling(true);
+
+    // here we create the new offer for video call
+    if (!channel) {
+      console.log('channel null');
+      alert('Could not start call');
+      return;
+    }
+
+    // init video connection
+    // const _videoConnection = new RTCPeerConnection({
+    //   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    // });
+    const _videoConnection = videoConnection;
+
+    const localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
+    localStream.getTracks().forEach((track) => {
+      _videoConnection.addTrack(track, localStream);
+      console.log('track added');
+    });
+
+    _videoConnection.oniceconnectionstatechange = (event) => {
+      console.log(
+        `on ice connection state change: ${_videoConnection.iceConnectionState}`
+      );
+    };
+
+    _videoConnection.onconnectionstatechange = (event) => {
+      console.log(
+        `video connection state change: ${_videoConnection.connectionState}`
+      );
+    };
+
+    const offer = await _videoConnection.createOffer();
+    await _videoConnection.setLocalDescription(offer);
+
+    const remoteStream = new MediaStream();
+
+    // pulling tracks from remote stream
+    _videoConnection.ontrack = (event) => {
+      console.log('on track!');
+      //setIsCalling(true);
+
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+      });
+    };
+
+    const remoteCamera = document.getElementById('remote_camera');
+    remoteCamera.srcObject = remoteStream;
+
+    const localCamera = document.getElementById('local_camera');
+    localCamera.srcObject = localStream;
+  };
+
+  const initiateCall = async () => {
+    videoConnection.onicecandidate = (event) => {
+      let initiatorOffer = '';
+      if (!event.candidate) {
+        initiatorOffer = JSON.stringify(videoConnection.localDescription);
+        channel.send(`/call ${initiatorOffer}`);
+      }
+    };
+    await StartCall();
+  };
 
   if (!init) {
-    const _connection = connection;
+    const _connection = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
+
     _connection.ondatachannel = (event) => {
       console.log('ondatachannel');
-      const _channel = event.channel;
-      //channel.onopen = (event) => console.log('onopen', event);
-      //channel.onmessage = (event) => console.log('onmessage', event);
-      //_channel.onmessage = (event) => alert(event.data);
-
-      setChannel(_channel);
+      setChannel(event.channel);
     };
 
     _connection.oniceconnectionstatechange = (event) => {
@@ -71,6 +125,10 @@ function App() {
         onNavigateHandler(strings.screens.ChatScreen);
     };
 
+    _connection.onnegotiationneeded = (e) => {
+      console.log('negotiation needed');
+    };
+
     setConnection(_connection);
     setInit(true);
   }
@@ -83,8 +141,6 @@ function App() {
     let _channel = connection.createDataChannel('data');
     const _connection = connection;
 
-    //_channel.onmessage = (event) => alert(event.data);
-
     _connection.onicecandidate = (event) => {
       // console.log('onicecandidate', event)
       if (!event.candidate) {
@@ -96,12 +152,10 @@ function App() {
     await _connection.setLocalDescription(offer);
 
     setChannel(_channel);
-    setConnection(_connection);
   };
 
   const onAcceptOffer = async (offerSDP) => {
     let _connection = connection;
-    let _channel = channel;
 
     const offer = JSON.parse(offerSDP);
     await _connection.setRemoteDescription(offer);
@@ -114,16 +168,11 @@ function App() {
 
     const answer = await _connection.createAnswer();
     await _connection.setLocalDescription(answer);
-
-    setChannel(_channel);
-    setConnection(_connection);
   };
 
   const onAcceptTargetOffer = async (targetOfferSDP) => {
-    const _connection = connection;
     const answer = JSON.parse(targetOfferSDP);
     await connection.setRemoteDescription(answer);
-    setConnection(_connection);
   };
 
   return (
@@ -139,7 +188,12 @@ function App() {
         />
       )}
       {navigationScreen === strings.screens.ChatScreen && (
-        <ChatScreen channel={channel} startCall={StartCall} />
+        <ChatScreen
+          channel={channel}
+          initiateCall={initiateCall}
+          startCall={StartCall}
+          connection={videoConnection}
+        />
       )}
       {navigationScreen === strings.screens.WaitingScreen && <WaitingScreen />}
       {navigationScreen === strings.screens.AcceptInitiatorOfferScreen && (
@@ -158,6 +212,7 @@ function App() {
               <video
                 id='local_camera'
                 autoPlay={true}
+                muted={true}
                 className='bg-slate-400 w-2/4 mx-1 rounded-md'
               ></video>
               <video
