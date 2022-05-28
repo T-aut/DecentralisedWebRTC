@@ -18,7 +18,6 @@ const AcceptInitiatorOfferScreen = (props) => {
   return (
     <Card className='justify-center items-center'>
       <div className='flex w-full mb-6 flex-grow-0'>
-        <BackButton />
         <div className='w-full flex justify-center items-center'>
           <h1 className='font-semibold text-2xl text-center'>Start chatting</h1>
         </div>
@@ -26,7 +25,7 @@ const AcceptInitiatorOfferScreen = (props) => {
       <div className='max-w-sm mb-6'>
         <p className='text-lg mb-2'>Step 1: accept the offer</p>
         <p className='w-auto'>
-          Paste in the offer from your peer into the input below and press
+          Paste in the offer text from your peer into the input below and press
           continue. Once completed, send your created offer string back to your
           peer.
         </p>
@@ -34,7 +33,9 @@ const AcceptInitiatorOfferScreen = (props) => {
         <input value={initiatorOffer} onChange={onChange} />
         <p className='py-4'>{props.targetOffer}</p>
       </div>
-      <ButtonPrimary onClick={onContinue}>Continue</ButtonPrimary>
+      {!props.targetOffer && (
+        <ButtonPrimary onClick={onContinue}>Continue</ButtonPrimary>
+      )}
     </Card>
   );
 };

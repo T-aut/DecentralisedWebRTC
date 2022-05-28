@@ -29,8 +29,8 @@ function App() {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     })
   );
-  const [localStream, setLocalStream] = useState(new MediaStream());
-  const [remoteStream, setRemoteStream] = useState(new MediaStream());
+  // const [localStream, setLocalStream] = useState(new MediaStream());
+  // const [remoteStream, setRemoteStream] = useState(new MediaStream());
 
   const StartCall = async () => {
     setIsCalling(true);
@@ -42,11 +42,12 @@ function App() {
       return;
     }
 
+    const _videoConnection = videoConnection;
+
     // init video connection
     // const _videoConnection = new RTCPeerConnection({
     //   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     // });
-    const _videoConnection = videoConnection;
 
     const localStream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -68,6 +69,14 @@ function App() {
       console.log(
         `video connection state change: ${_videoConnection.connectionState}`
       );
+      if (_videoConnection.connectionState === 'disconnected') {
+        setIsCalling(false);
+        setVideoConnection(
+          new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+          })
+        );
+      }
     };
 
     const offer = await _videoConnection.createOffer();
@@ -86,9 +95,11 @@ function App() {
     };
 
     const remoteCamera = document.getElementById('remote_camera');
+    //setRemoteStream(remoteStream);
     remoteCamera.srcObject = remoteStream;
 
     const localCamera = document.getElementById('local_camera');
+    //setLocalStream(localStream);
     localCamera.srcObject = localStream;
   };
 
@@ -221,7 +232,19 @@ function App() {
                 className='bg-slate-400 w-2/4 mx-1 rounded-md'
               ></video>
             </div>
-            <ButtonPrimary>End call</ButtonPrimary>
+            <ButtonPrimary
+              onClick={() => {
+                setIsCalling(false);
+                videoConnection.close();
+                setVideoConnection(
+                  new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+                  })
+                );
+              }}
+            >
+              End call
+            </ButtonPrimary>
           </div>
         </Modal>
       )}

@@ -7,6 +7,10 @@ const ChatScreen = (props) => {
   const [messages, setMessages] = useState([]);
   const [init, setInit] = useState(false);
 
+  console.log(
+    `video connection state in chatScreen ${props.connection.connectionState}`
+  );
+
   if (!init) {
     if (props.channel) {
       props.channel.onmessage = (event) => {
@@ -17,18 +21,18 @@ const ChatScreen = (props) => {
           acceptInitiatorCallSDP(message);
         } else if (message.includes('/accept-call {')) {
           acceptPeerCallSDP(message);
+        } else {
+          setMessages((prevState) => {
+            return [
+              ...prevState,
+              {
+                message,
+                key: new Date().getTime(),
+                isSender: false,
+              },
+            ];
+          });
         }
-
-        setMessages((prevState) => {
-          return [
-            ...prevState,
-            {
-              message,
-              key: new Date().getTime(),
-              isSender: false,
-            },
-          ];
-        });
       };
       setInit(true);
     }

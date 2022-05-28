@@ -20,16 +20,14 @@ const CreateOfferScreen = (props) => {
   return (
     <Card className='justify-center items-center'>
       <div className='flex w-full mb-6 flex-grow-0'>
-        <BackButton />
         <div className='w-full flex justify-center items-center'>
           <h1 className='font-semibold text-2xl text-center'>Start chatting</h1>
         </div>
       </div>
       <div className='max-w-sm mb-6'>
-        <p className='text-lg mb-2'>Step 1: create an identifier</p>
+        <p className='text-lg mb-2'>Step 1: send the identifier</p>
         <p className='w-auto'>
-          Enter a random word of your choice or generate a random string of
-          characters
+          Send this line of text to your peer
         </p>
         {/* <input className='mt-4 w-full' type='text' value={identifier} /> */}
         <p className='py-4'>{props.offer}</p>
